@@ -53,7 +53,7 @@
                             <label for="ca_cert" class="form-label">CA Certificate</label>
                             <input type="file" class="form-control" id="ca_cert" name="ca_cert" accept=".pem,.crt">
                             {% if docker_settings.ca_cert %}
-                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Uploaded</small>
+                            <small class="text-success"> Uploaded</small>
                             {% endif %}
                         </div>
                         
@@ -61,7 +61,7 @@
                             <label for="client_cert" class="form-label">Client Certificate</label>
                             <input type="file" class="form-control" id="client_cert" name="client_cert" accept=".pem,.crt">
                             {% if docker_settings.client_cert %}
-                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Uploaded</small>
+                            <small class="text-success"> Uploaded</small>
                             {% endif %}
                         </div>
                         
@@ -69,7 +69,7 @@
                             <label for="client_key" class="form-label">Client Key</label>
                             <input type="file" class="form-control" id="client_key" name="client_key" accept=".pem,.key">
                             {% if docker_settings.client_key %}
-                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Uploaded</small>
+                            <small class="text-success"> Uploaded</small>
                             {% endif %}
                         </div>
                     </div>
@@ -183,7 +183,7 @@
             <!-- Repository Whitelist -->
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-shield-check"></i> Allowed Repositories</h5>
+                    <h5 class="mb-0"> Allowed Repositories</h5>
                 </div>
                 <div class="card-body">
                     <label for="allowed_repositories" class="form-label fw-bold">Repository Prefixes (one per line)</label>

@@ -73,7 +73,7 @@
         <!-- Team Confirmation -->
         <div class="card">
             <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="bi bi-check-circle"></i> Team Found!</h5>
+                <h5 class="mb-0"> Team Found!</h5>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
@@ -123,7 +123,7 @@
                         <i class="bi bi-x"></i> Cancel
                     </a>
                     <button type="button" class="btn btn-success btn-lg" onclick="confirmJoin()">
-                        <i class="bi bi-check-circle"></i> Confirm & Join Team
+                         Confirm & Join Team
                     </button>
                 </div>
                 
@@ -152,7 +152,7 @@ function confirmJoin() {
     confirmButtons.style.display = 'none';
     loading.style.display = 'block';
     
-    fetch('{{ url_for("teams.confirm_join_team") }}', {
+    fetchWithCSRF('{{ url_for("teams.confirm_join_team") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

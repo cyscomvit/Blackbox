@@ -8,6 +8,23 @@ from services.websocket import WebSocketService
 notifications_bp = Blueprint('notifications', __name__, url_prefix='/api')
 
 
+@notifications_bp.route('/competition-status')
+@login_required
+def competition_status():
+    from datetime import datetime, timezone
+    from models.settings import Settings
+    from services.standings import frozen_snapshot
+    def timestamp(key):
+        value = Settings.get(key, type='datetime')
+        return value.replace(tzinfo=timezone.utc).isoformat() if value else None
+    snapshot = frozen_snapshot()
+    response = jsonify(status=Settings.get_ctf_status(), start=timestamp('ctf_start_time'),
+                       end=timestamp('ctf_end_time'), now=datetime.now(timezone.utc).isoformat(),
+                       frozen_at=snapshot['at'] if snapshot else None)
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
 @notifications_bp.route('/notifications')
 @login_required
 def get_notifications():

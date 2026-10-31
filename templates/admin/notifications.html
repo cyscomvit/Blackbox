@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = this.dataset.id;
             if (!id) return;
             if (!confirm('Delete this notification for all users?')) return;
-            fetch(`/api/notifications/${id}/delete`, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') } })
+            fetchWithCSRF(`/api/notifications/${id}/delete`, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') } })
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.success) {

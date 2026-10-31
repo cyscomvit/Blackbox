@@ -3,68 +3,7 @@
 {% block title %}{{ challenge.name }} - {{ ctf_name }}{% endblock %}
 
 {% block content %}
-<style>
-.act-unlock-toast {
-    min-width: 320px;
-    max-width: 400px;
-    border-left: 4px solid #0d6efd;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    pointer-events: auto;
-}
 
-.act-unlock-toast .toast-header {
-    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-    border: none;
-}
-
-.act-unlock-toast .toast-body {
-    background: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    padding: 1rem;
-    font-size: 0.95rem;
-}
-
-.act-unlock-toast .toast-body h6 {
-    color: #0d6efd;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
-
-/* Toast container that doesn't block interactions */
-.toast-container {
-    pointer-events: none;
-}
-
-@keyframes slideInFromRight {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideOutToRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-}
-
-.act-unlock-toast.show {
-    animation: slideInFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.act-unlock-toast.hiding {
-    animation: slideOutToRight 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
-}
-</style>
 
 <div class="row">
     <div class="col-lg-8">
@@ -74,15 +13,16 @@
                     <h3 class="mb-0">
                         {{ challenge.name }}
                         {% if challenge.solved %}
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                        
                         {% endif %}
                     </h3>
                     <span class="badge bg-warning text-dark fs-5">{{ challenge.points }} pts</span>
                 </div>
             </div>
             <div class="card-body">
-                <div class="mb-3">
-                    <span class="badge bg-primary me-2">{{ challenge.category|upper }}</span>
+                <div class="challenge-meta mb-3">
+                    <span class="badge bg-primary">{{ challenge.category|upper }}</span>
+                    {% include 'components/challenge_type.html' %}
                     {% if challenge.difficulty %}
                     <span class="badge 
                         {% if challenge.difficulty == 'easy' %}bg-success
@@ -93,7 +33,7 @@
                     </span>
                     {% endif %}
                     {% if challenge.author %}
-                    <span class="badge bg-secondary ms-2">
+                    <span class="badge bg-secondary">
                         <i class="bi bi-person"></i> {{ challenge.author }}
                     </span>
                     {% endif %}
@@ -166,7 +106,7 @@
                                     <div class="flex-grow-1">
                                         {% if hint.unlocked %}
                                         <div class="hint-content">
-                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            
                                             <strong>Hint {{ hint.order }}</strong>
                                             <span class="badge bg-success ms-2">Unlocked</span>
                                             <p class="mb-0 mt-2">{{ hint.content }}</p>
@@ -240,7 +180,7 @@
                             <div class="list-group">
                                 {% for path in challenge.unlocked_paths %}
                                 <div class="list-group-item">
-                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    
                                     <strong>{{ path.challenge_name }}</strong>
                                     <span class="badge bg-secondary">{{ path.category }}</span>
                                     <small class="text-muted">via {{ path.flag_label or 'flag' }}</small>
@@ -266,12 +206,13 @@
                         <strong>Points:</strong> 
                         <span class="badge bg-warning text-dark">{{ challenge.points }}</span>
                         {% if challenge.is_dynamic %}
-                        <small class="text-muted">(Dynamic)</small>
+                        <small class="text-muted">(Variable points)</small>
                         {% endif %}
                     </li>
                     <li class="mb-2">
                         <strong>Category:</strong> {{ challenge.category }}
                     </li>
+                    <li class="mb-2">{% include 'components/challenge_type.html' %}</li>
                     {% if challenge.difficulty %}
                     <li class="mb-2">
                         <strong>Difficulty:</strong> {{ challenge.difficulty|capitalize }}
@@ -318,7 +259,7 @@ async function unlockHint(hintId, cost) {
     }
     
     try {
-        const response = await fetch(`/hints/${hintId}/unlock`, {
+        const response = await fetchWithCSRF(`/hints/${hintId}/unlock`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -333,10 +274,10 @@ async function unlockHint(hintId, cost) {
             if (hintCard) {
                 hintCard.querySelector('.card-body').innerHTML = `
                     <div class="hint-content">
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                        
                         <strong>Hint</strong>
                         <span class="badge bg-success ms-2">Unlocked</span>
-                        <p class="mb-0 mt-2">${data.content}</p>
+                        <p class="mb-0 mt-2">${escapeHtml(data.content)}</p>
                     </div>
                 `;
             }
@@ -389,7 +330,7 @@ async function submitFlag(event) {
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
     
     try {
-        const response = await fetch('{{ url_for("challenges.submit_flag", challenge_id=challenge.id) }}', {
+        const response = await fetchWithCSRF('{{ url_for("challenges.submit_flag", challenge_id=challenge.id) }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -402,7 +343,7 @@ async function submitFlag(event) {
         if (data.success) {
             resultDiv.innerHTML = `
                 <div class="alert alert-success alert-dismissible fade show">
-                    <i class="bi bi-check-circle-fill"></i> ${data.message}
+                     ${escapeHtml(data.message)}
                     <br><strong>Points earned: ${data.points}</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -420,7 +361,7 @@ async function submitFlag(event) {
         } else {
             resultDiv.innerHTML = `
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-x-circle-fill"></i> ${data.message}
+                    <i class="bi bi-x-circle-fill"></i> ${escapeHtml(data.message)}
                     ${data.remaining_attempts !== undefined ? 
                       `<br><small>Remaining attempts: ${data.remaining_attempts}</small>` : ''}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -470,7 +411,7 @@ async function submitExploreFlag(event) {
     `;
     
     try {
-        const response = await fetch('{{ url_for("challenges.explore_flag", challenge_id=challenge.id) }}', {
+        const response = await fetchWithCSRF('{{ url_for("challenges.explore_flag", challenge_id=challenge.id) }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -482,12 +423,12 @@ async function submitExploreFlag(event) {
         
         if (data.success) {
             let message = `<div class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-check-circle-fill"></i> ${data.message}`;
+                 ${escapeHtml(data.message)}`;
             
             if (data.unlocked_challenges && data.unlocked_challenges.length > 0) {
                 message += '<br><strong>New paths unlocked:</strong><ul class="mb-0 mt-2">';
                 data.unlocked_challenges.forEach(challenge => {
-                    message += `<li><i class="bi bi-unlock-fill text-success"></i> ${challenge.name} (${challenge.category})</li>`;
+                    message += `<li><i class="bi bi-unlock-fill text-success"></i> ${escapeHtml(challenge.name)} (${escapeHtml(challenge.category)})</li>`;
                 });
                 message += '</ul>';
             }
@@ -507,7 +448,7 @@ async function submitExploreFlag(event) {
         } else {
             resultDiv.innerHTML = `
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-x-circle-fill"></i> ${data.message}
+                    <i class="bi bi-x-circle-fill"></i> ${escapeHtml(data.message)}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
@@ -530,7 +471,7 @@ function showActUnlockToast(actName) {
     if (!toastContainer) {
         toastContainer = document.createElement('div');
         toastContainer.id = 'actUnlockToastContainer';
-        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.className = 'toast-stack';
         toastContainer.style.zIndex = '9999';
         document.body.appendChild(toastContainer);
     }
@@ -545,7 +486,7 @@ function showActUnlockToast(actName) {
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body">
-                <h6>${actName} Unlocked!</h6>
+                <h6>${escapeHtml(actName)} Unlocked!</h6>
                 <p class="mb-0 small">Check the sidebar to explore new challenges!</p>
             </div>
         </div>

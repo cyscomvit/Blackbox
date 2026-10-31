@@ -6,6 +6,7 @@ from services.cache import cache_service
 scoreboard_bp = Blueprint('scoreboard', __name__, url_prefix='/scoreboard')
 
 @scoreboard_bp.route('/')
+@login_required
 def view_scoreboard():
     """View scoreboard page"""
     from models.settings import Settings
@@ -34,6 +35,7 @@ def view_scoreboard():
 
 
 @scoreboard_bp.route('/api/data')
+@login_required
 def get_scoreboard_data():
     """Get scoreboard data (API endpoint)"""
     from models.settings import Settings
@@ -53,38 +55,34 @@ def get_scoreboard_data():
     # Check if teams are enabled
     teams_enabled = Settings.get('teams_enabled', default=True, type='bool')
     
-    # Try cache first
-    cache_key = 'scoreboard_team' if teams_enabled else 'scoreboard_individual'
-    scoreboard = cache_service.get(cache_key)
-    
-    if not scoreboard:
-        # Generate fresh scoreboard
-        scoreboard = ScoringService.get_scoreboard(team_based=teams_enabled, limit=100)
-        cache_service.set(cache_key, scoreboard, ttl=60)
-    
-    return jsonify(scoreboard)
+    from services.standings import standings_for
+    from flask import request
+    rows = standings_for(current_user)
+    if request.args.get('nearby') == '1':
+        entrant = current_user.team_id if teams_enabled else current_user.id
+        index = next((i for i, row in enumerate(rows) if row['id'] == entrant), None)
+        return jsonify(rows[max(0, index - 2):index + 3] if index is not None else [])
+    return jsonify(rows[:100])
+
 
 
 @scoreboard_bp.route('/api/top/<int:limit>')
+@login_required
 def get_top_teams(limit):
     """Get top N teams or users"""
     from models.settings import Settings
     
-    limit = min(limit, 100)  # Cap at 100
-    
+    is_admin = current_user.is_authenticated and current_user.is_admin
+    if not is_admin and (not Settings.is_ctf_started() or not Settings.get('scoreboard_visible', default=True, type='bool')):
+        return jsonify([])
+    limit = min(limit, 100)
+
     # Check if teams are enabled
     teams_enabled = Settings.get('teams_enabled', default=True, type='bool')
     
-    cache_key = 'scoreboard_team' if teams_enabled else 'scoreboard_individual'
-    scoreboard = cache_service.get(cache_key)
-    
-    if not scoreboard:
-        scoreboard = ScoringService.get_scoreboard(team_based=teams_enabled, limit=limit)
-        cache_service.set(cache_key, scoreboard, ttl=60)
-    else:
-        scoreboard = scoreboard[:limit]
-    
-    return jsonify(scoreboard)
+    from services.standings import standings_for
+    return jsonify(standings_for(current_user)[:max(0, limit)])
+
 
 
 @scoreboard_bp.route('/api/stats')

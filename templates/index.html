@@ -1,127 +1,55 @@
 {% extends "base.html" %}
-
-{% block title %}Home - {{ ctf_name }}{% endblock %}
-
+{% block title %}{{ ctf_name }} - Capture the flag{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto text-center">
-        <h1 class="display-3 mb-4">
-            {% if ctf_logo %}
-                <img src="/uploads/{{ ctf_logo }}" alt="{{ ctf_name }} Logo" style="height: 60px; width: auto; margin-right: 15px;">
+<section class="home-hero" aria-labelledby="home-title">
+    <div class="home-introduction">
+        <p class="eyebrow">{{ ctf_name }}</p>
+        <h1 id="home-title">Find the flaw.<br><span>Capture the flag.</span></h1>
+        <p class="home-description">{{ ctf_description or 'Investigate the challenge. Test your approach. Submit the flag.' }}</p>
+        <div class="home-actions">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-primary">Open challenges <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+            {% elif registration_enabled %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create an account <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">Sign in</a>
             {% else %}
-                <i class="bi bi-flag-fill text-primary"></i>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign in to compete <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
             {% endif %}
-            Welcome to {{ ctf_name }}
-        </h1>
-        <p class="lead mb-4">{{ ctf_description }}</p>
-        
-        {% if not current_user.is_authenticated %}
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center mb-5">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4">
-                <i class="bi bi-box-arrow-in-right"></i> Login
-            </a>
-            {% if registration_enabled %}
-            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-4">
-                <i class="bi bi-person-plus"></i> Register
-            </a>
-            {% endif %}
+            <a href="{{ url_for('about') }}#how-to-play" class="home-guide-link">How to play <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
+    </div>
+    <aside class="competition-desk" aria-labelledby="competition-desk-title">
+        <div class="desk-header"><span class="eyebrow mb-0">Competition desk</span></div>
+        <div class="desk-identity">
+            <img src="{{ url_for('serve_logo', filename=ctf_logo) if ctf_logo else url_for('static', filename='images/cyscom-logo.webp') }}" alt="{{ ctf_name }}" width="64" height="64">
+            <div><h2 id="competition-desk-title">{{ ctf_name }}</h2><p>Capture the flag</p></div>
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="desk-player"><span class="text-muted">Signed in as</span><strong>{{ current_user.username }}</strong></div>
+        <dl class="desk-score-grid"><div><dt>Current points</dt><dd>{{ current_user.get_score() }}</dd></div><div><dt>Challenges solved</dt><dd>{{ current_user.get_solves_count() }}</dd></div></dl>
+        <a class="desk-footer-link" href="{{ url_for('auth.profile') }}">View your profile <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         {% else %}
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center mb-5">
-            <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-primary btn-lg px-4">
-                <i class="bi bi-puzzle"></i> View Challenges
-            </a>
-            <a href="{{ url_for('scoreboard.view_scoreboard') }}" class="btn btn-outline-primary btn-lg px-4">
-                <i class="bi bi-trophy"></i> Scoreboard
-            </a>
-        </div>
+        <ol class="desk-steps">
+            <li><span>01</span><div><strong>Get access</strong><p>{{ 'Register an account or sign in.' if registration_enabled else 'Sign in with your event account.' }}</p></div></li>
+            <li><span>02</span><div><strong>{{ 'Find your team' if teams_enabled else 'Choose a challenge' }}</strong><p>{{ 'Create a team or join with an invite code.' if teams_enabled else 'Start with a category you know.' }}</p></div></li>
+            <li><span>03</span><div><strong>Submit your first flag</strong><p>Successful submissions count towards your score.</p></div></li>
+        </ol>
+        {% endif %}
+    </aside>
+<div class="home-workspace" aria-label="Explore the event">
+    <div class="action-grid">
+        <article class="action-panel"><div class="action-index"><span>01 / Challenges</span><i class="bi bi-terminal" aria-hidden="true"></i></div><h3>Investigate.<br>Test. Solve.</h3><p>Read the brief, examine the files, and find the flag. Each challenge has its own tools and approach.</p><a class="btn btn-outline-primary" href="{{ url_for('challenges.list_challenges') }}">{{ 'Browse challenges' if current_user.is_authenticated else 'Sign in for challenges' }} <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+        {% if teams_enabled %}
+        <article class="action-panel"><div class="action-index"><span>02 / Team workspace</span><i class="bi bi-people" aria-hidden="true"></i></div><h3>Different skills.<br>One team.</h3><p>Bring your teammates together. Create a team or use an invite code to join an existing one.</p><a class="btn btn-outline-primary" href="{{ url_for('teams.view_team', team_id=current_user.team_id) if current_user.is_authenticated and current_user.team_id else url_for('teams.list_teams') }}">{{ 'Open your team' if current_user.is_authenticated and current_user.team_id else 'Find your team' }} <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+        {% else %}
+        <article class="action-panel"><div class="action-index"><span>02 / Personal progress</span><i class="bi bi-person" aria-hidden="true"></i></div><h3>Your solves.<br>Your progress.</h3><p>Keep track of the challenges you have solved and the points attached to each successful submission.</p><a class="btn btn-outline-primary" href="{{ url_for('auth.profile') }}">View your profile <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+        {% endif %}
+        {% if current_user.is_authenticated and (scoreboard_visible or current_user.is_admin) %}
+        <article class="action-panel"><div class="action-index"><span>03 / Standings</span><i class="bi bi-list-ol" aria-hidden="true"></i></div><h3>Follow the<br>competition.</h3><p>See the current rankings, points, and solves. The leaderboard updates as the competition progresses.</p><a class="btn btn-outline-primary" href="{{ url_for('scoreboard.view_scoreboard') }}">View leaderboard <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+        {% else %}
+        <article class="action-panel"><div class="action-index"><span>03 / Event guide</span><i class="bi bi-book" aria-hidden="true"></i></div><h3>Know the format.<br>Be ready.</h3><p>Read how submissions, scoring, and event rules work before attempting your next challenge.</p><a class="btn btn-outline-primary" href="{{ url_for('about') }}">Open the guide <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
         {% endif %}
     </div>
 </div>
-
-<div class="row mt-5">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-puzzle-fill text-primary" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-3">Challenges</h5>
-                <p class="card-text">Solve various cybersecurity challenges across multiple categories including Web, Crypto, Forensics, and more.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-people-fill text-success" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-3">Team Play</h5>
-                <p class="card-text">Create or join teams to collaborate with others and compete together on the scoreboard.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-trophy-fill text-warning" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-3">Live Scoreboard</h5>
-                <p class="card-text">Track your progress with real-time updates and dynamic scoring based on challenge difficulty.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if current_user.is_authenticated %}
-<div class="row mt-4">
-    <div class="col-12">
-        <h3 class="text-center mb-4">Your Stats</h3>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="text-primary">{{ current_user.get_score() }}</h2>
-                <p class="mb-0">Total Points</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="text-success">{{ current_user.get_solves_count() }}</h2>
-                <p class="mb-0">Challenges Solved</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="text-info">
-                    {% if current_user.team_id %}
-                    <i class="bi bi-check-circle-fill"></i>
-                    {% else %}
-                    <i class="bi bi-x-circle-fill"></i>
-                    {% endif %}
-                </h2>
-                <p class="mb-0">Team Status</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="text-warning">
-                    {% if current_user.is_admin %}
-                    <i class="bi bi-shield-fill-check"></i>
-                    {% else %}
-                    <i class="bi bi-person-fill"></i>
-                    {% endif %}
-                </h2>
-                <p class="mb-0">Role</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-<br/>
-<div class="text-center mb-4">
-        <a href="{{ url_for('about') }}" class="btn btn-sm btn-outline-secondary" role="button" aria-label="About">About</a>
-</div>
+</section>
 {% endblock %}

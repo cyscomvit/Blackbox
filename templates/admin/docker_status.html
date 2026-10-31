@@ -146,7 +146,7 @@ function sortTable(columnIndex) {
 function deleteContainer(id) {
     if (!confirm('Delete this container?')) return;
     
-    fetch(`/admin/docker/containers/${id}/delete`, {
+    fetchWithCSRF(`/admin/docker/containers/${id}/delete`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
     })
@@ -172,7 +172,7 @@ function deleteContainer(id) {
 function deleteAllContainers() {
     if (!confirm('Delete ALL containers? This cannot be undone!')) return;
     
-    fetch('/admin/docker/containers/delete-all', {
+    fetchWithCSRF('/admin/docker/containers/delete-all', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
     })
@@ -193,19 +193,19 @@ function deleteAllContainers() {
 
 <style>
 #containers-table th {
-    background-color: #f8f9fa;
+    background-color: var(--surface);
     position: sticky;
     top: 0;
     z-index: 1;
 }
 
 #containers-table th:hover {
-    background-color: #e9ecef;
+    background-color: var(--raised);
 }
 
 #containers-table code {
     background-color: transparent;
-    color: #6c757d;
+    color: var(--muted);
     font-size: 0.875rem;
 }
 </style>
