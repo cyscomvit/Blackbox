@@ -1097,7 +1097,13 @@ def update_event_config():
         # Update scoreboard visibility
         scoreboard_visible = 'scoreboard_visible' in request.form
         Settings.set('scoreboard_visible', scoreboard_visible, 'bool', 'Show scoreboard to users')
+        from services.websocket import socketio
+        socketio.emit('scoreboard_visibility', {'visible': scoreboard_visible}, namespace='/live', to='scoreboard_authenticated')
         
+        from services.standings import set_frozen, frozen_snapshot
+        set_frozen('scoreboard_frozen' in request.form)
+        socketio.emit('scoreboard_freeze', {'frozen': bool(frozen_snapshot())}, namespace='/live', to='scoreboard_authenticated')
+
         # Update first blood bonus
         first_blood_bonus = request.form.get('first_blood_bonus', '0')
         try:
@@ -1118,7 +1124,7 @@ def update_event_config():
                 from flask import current_app
                 
                 # Use /var/uploads/logos (volume-mounted writable directory)
-                uploads_dir = '/var/uploads/logos'
+                uploads_dir = current_app.config['LOGO_UPLOAD_FOLDER']
                 
                 # Create uploads directory if it doesn't exist
                 os.makedirs(uploads_dir, exist_ok=True)
@@ -1189,6 +1195,11 @@ def update_background_theme():
     import re
     
     try:
+        site_theme = request.form.get('site_theme', Settings.get('site_theme', 'default'))
+        if site_theme not in ('default', 'graphite', 'forest', 'copper', 'paper'):
+            flash('Choose one of the available colour palettes.', 'error')
+            return redirect(url_for('admin.settings'))
+        Settings.set('site_theme', site_theme, 'string', 'Site colour palette selected by administrators')
         enabled = 'custom_background_enabled' in request.form
         Settings.set('custom_background_enabled', enabled, 'bool', 'Enable custom background theme')
         
@@ -2832,7 +2843,12 @@ def submissions():
     user_id = request.args.get('user_id', None, type=int)
     correct_only = request.args.get('correct_only', None)
 
-    query = Submission.query
+    from sqlalchemy.orm import joinedload
+    from models.challenge import Challenge
+    challenge_type = request.args.get('challenge_type', '')
+    query = Submission.query.options(joinedload(Submission.user), joinedload(Submission.team), joinedload(Submission.challenge))
+    if challenge_type in ('dynamic', 'static'):
+        query = query.filter(Submission.challenge.has(Challenge.docker_enabled == (challenge_type == 'dynamic')))
 
     if challenge_id:
         query = query.filter(Submission.challenge_id == challenge_id)
@@ -2853,7 +2869,8 @@ def submissions():
     return render_template('admin/submissions.html',
                            submissions=submissions,
                            challenges=challenges,
-                           users=users)
+                           users=users,
+                           pagination_args={key: value for key, value in request.args.items() if key != 'page'})
 
 
 @admin_bp.route('/submissions/export')
@@ -2866,9 +2883,15 @@ def export_submissions():
     from flask import Response
 
     challenge_id = request.args.get('challenge_id', None, type=int)
+    user_id = request.args.get('user_id', None, type=int)
     correct_only = request.args.get('correct_only', None)
 
-    query = Submission.query
+    from sqlalchemy.orm import joinedload
+    from models.challenge import Challenge
+    challenge_type = request.args.get('challenge_type', '')
+    query = Submission.query.options(joinedload(Submission.user), joinedload(Submission.team), joinedload(Submission.challenge))
+    if challenge_type in ('dynamic', 'static'):
+        query = query.filter(Submission.challenge.has(Challenge.docker_enabled == (challenge_type == 'dynamic')))
     if challenge_id:
         query = query.filter(Submission.challenge_id == challenge_id)
     if correct_only == '1':
@@ -2876,11 +2899,13 @@ def export_submissions():
     elif correct_only == '0':
         query = query.filter(Submission.is_correct == False)
 
+    if user_id:
+        query = query.filter(Submission.user_id == user_id)
     subs = query.order_by(Submission.submitted_at.desc()).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID', 'Time', 'Username', 'Team', 'Challenge', 'Flag Submitted', 'Correct', 'IP Address'])
+    writer.writerow(['ID', 'Time', 'Username', 'Team', 'Challenge', 'Challenge Type', 'Flag Submitted', 'Correct', 'IP Address'])
 
     for s in subs:
         writer.writerow([
@@ -2889,6 +2914,7 @@ def export_submissions():
             s.user.username if s.user else s.user_id,
             s.team.name if s.team else '',
             s.challenge.name if s.challenge else s.challenge_id,
+            ('Dynamic' if s.challenge.docker_enabled else 'Static') if s.challenge else '',
             s.submitted_flag,
             'Yes' if s.is_correct else 'No',
             s.ip_address or ''

@@ -77,5 +77,6 @@ files/
 
 # Node modules 
 node_modules/
+artifacts/ui/
 package-lock.json
 yarn.lock

@@ -505,7 +505,7 @@
                             <i class="bi bi-x-circle"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-primary btn-lg px-5">
-                            <i class="bi bi-check-circle"></i> Save Changes
+                             Save Changes
                         </button>
                     </div>
                 </form>
@@ -529,11 +529,11 @@
 }
 
 .card {
-    transition: box-shadow 0.2s;
+
 }
 
 .card:hover {
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+
 }
 
 .border-primary, .border-success, .border-warning, .border-secondary {
@@ -607,7 +607,7 @@ function deleteExistingFlag(flagId) {
         return;
     }
     
-    fetch(`/admin/challenges/flags/${flagId}/delete`, {
+    fetchWithCSRF(`/admin/challenges/flags/${flagId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -646,7 +646,7 @@ function toggleDockerSettings() {
 }
 
 function loadDockerImages() {
-    fetch('/admin/docker/images')
+    fetchWithCSRF('/admin/docker/images')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('docker_image');
@@ -807,7 +807,7 @@ function deleteExistingHint(hintId) {
         return;
     }
     
-    fetch(`/admin/hints/${hintId}/delete`, {
+    fetchWithCSRF(`/admin/hints/${hintId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -833,7 +833,7 @@ function deleteFile(fileId) {
         return;
     }
     
-    fetch(`/admin/challenges/files/${fileId}/delete`, {
+    fetchWithCSRF(`/admin/challenges/files/${fileId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -859,7 +859,7 @@ function deleteImage(imageId) {
         return;
     }
     
-    fetch(`/admin/challenges/images/${imageId}/delete`, {
+    fetchWithCSRF(`/admin/challenges/images/${imageId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

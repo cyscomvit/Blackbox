@@ -138,7 +138,7 @@
                                                style="font-size: 0.85rem;">
                                         <button class="btn btn-outline-secondary" 
                                                 type="button" 
-                                                onclick="copyFlag('{{ data.expected_flag }}', {{ data.container.id }})">
+                                                onclick='copyFlag({{ data.expected_flag|tojson }}, {{ data.container.id }}, this)'>
                                             <i class="bi bi-clipboard"></i>
                                         </button>
                                     </div>
@@ -188,7 +188,7 @@
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary" 
                                             onclick="testFlag({{ data.container.id }}, '{{ data.expected_flag }}')">
-                                        <i class="bi bi-check-circle"></i> Test
+                                         Test
                                     </button>
                                     <button class="btn btn-sm btn-outline-info" 
                                             onclick="showDetails({{ data.container.id | tojson }})">
@@ -269,16 +269,16 @@
     cursor: pointer;
 }
 .flag-input:hover {
-    background-color: #f8f9fa;
+    background-color: var(--surface);
 }
 </style>
 
 <script>
-function copyFlag(flag, containerId) {
+function copyFlag(flag, containerId, button) {
     navigator.clipboard.writeText(flag).then(() => {
-        const btn = event.target.closest('button');
+        const btn = button;
         const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-check"></i>';
+        btn.innerHTML = '';
         btn.classList.add('btn-success');
         btn.classList.remove('btn-outline-secondary');
         
@@ -296,7 +296,7 @@ function testFlag(containerId, expectedFlag) {
     const testFlag = prompt('Enter flag to test against container #' + containerId + ':', expectedFlag);
     if (!testFlag) return;
     
-    fetch('/admin/dynamic-flags/verify', {
+    fetchWithCSRF('/admin/dynamic-flags/verify', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -315,7 +315,7 @@ function testFlag(containerId, expectedFlag) {
             let alertClass = '';
             
             if (verification.valid) {
-                icon = '✅';
+                icon = '';
                 alertClass = 'alert-success';
                 message = `${icon} <strong>VALID FLAG!</strong><br>`;
                 message += `Expected: <code>${verification.expected}</code><br>`;
@@ -323,7 +323,7 @@ function testFlag(containerId, expectedFlag) {
                     message += `Note: ${verification.note}`;
                 }
             } else {
-                icon = '❌';
+                icon = '';
                 alertClass = 'alert-danger';
                 message = `${icon} <strong>INVALID FLAG</strong><br>`;
                 message += `Submitted: <code>${verification.submitted}</code><br>`;
@@ -350,11 +350,11 @@ function testFlag(containerId, expectedFlag) {
 }
 
 function checkUniqueness() {
-    const btn = event.target.closest('button');
+    const btn = button;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking...';
     
-    fetch('/admin/dynamic-flags/check-uniqueness', {
+    fetchWithCSRF('/admin/dynamic-flags/check-uniqueness', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -377,10 +377,10 @@ function checkUniqueness() {
             let alertClass = 'alert-success';
             
             if (data.is_robust) {
-                message = `<i class="bi bi-check-circle-fill"></i> <strong>All Clear!</strong><br>`;
-                message += `✅ All ${data.total_active_containers} active containers have unique flags<br>`;
-                message += `✅ No duplicate flags detected<br>`;
-                message += `✅ No team collisions detected<br>`;
+                message = ` <strong>All Clear!</strong><br>`;
+                message += ` All ${data.total_active_containers} active containers have unique flags<br>`;
+                message += ` No duplicate flags detected<br>`;
+                message += ` No team collisions detected<br>`;
                 message += `<strong>System is robust and fair!</strong>`;
             } else {
                 alertClass = 'alert-danger';

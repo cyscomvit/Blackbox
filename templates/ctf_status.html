@@ -63,7 +63,7 @@
 <script>
 // Check every 30 seconds if CTF has resumed
 setInterval(() => {
-    fetch("{{ url_for('challenges.list_challenges') }}")
+    fetchWithCSRF("{{ url_for('challenges.list_challenges') }}")
         .then(response => {
             // If we get redirected to challenges page (not this status page), reload
             if (response.ok && !response.url.includes('challenges')) {

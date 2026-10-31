@@ -294,7 +294,7 @@
                            placeholder="e.g., Bonus for participation, Penalty for rule violation">
                 </div>
                 <button class="btn btn-primary w-100" onclick="adjustPoints()">
-                    <i class="bi bi-check-circle"></i> Apply Point Adjustment
+                     Apply Point Adjustment
                 </button>
             </div>
         </div>
@@ -321,7 +321,7 @@ function adjustPoints() {
         return;
     }
     
-    fetch(`/admin/users/${userId}/adjust-points`, {
+    fetchWithCSRF(`/admin/users/${userId}/adjust-points`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -380,7 +380,7 @@ function showFlash(message, type) {
 }
 
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+
 }
 </style>
 {% endblock %}

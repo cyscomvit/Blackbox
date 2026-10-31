@@ -142,9 +142,9 @@ def list_challenges():
             continue  # Skip this challenge if it requires team and user has no team
         
         # Check if challenge is unlocked for user
-        if not current_user.is_admin:
-            if not challenge.is_unlocked_for_user(current_user.id, team.id if team else None):
-                continue  # Skip hidden/locked challenges
+        locked = not challenge.is_unlocked_for_user(current_user.id, team.id if team else None)
+        if not current_user.is_admin and locked and (challenge.is_hidden or not challenge.is_visible):
+            continue  # Never disclose hidden challenges before they unlock.
         
         # Initialize ACT dict if needed
         if act_name not in acts:
@@ -159,6 +159,9 @@ def list_challenges():
         
         challenge_data = challenge.to_dict(include_flag=False)
         challenge_data['solved'] = solved
+        challenge_data['locked'] = locked
+        if locked and not current_user.is_admin:
+            challenge_data['description'] = 'Complete the prerequisites to unlock this challenge.'
         challenge_data['requires_team'] = challenge.requires_team
         
         # Add prerequisite info if locked
@@ -1029,7 +1032,7 @@ def submit_flag(challenge_id):
         # Send updated scoreboard (check if teams are enabled)
         teams_enabled = Settings.get('teams_enabled', default=True, type='bool')
         cache_key = 'scoreboard_team' if teams_enabled else 'scoreboard_individual'
-        scoreboard = ScoringService.get_scoreboard(team_based=teams_enabled, limit=50)
+        scoreboard = ScoringService.get_scoreboard(team_based=teams_enabled, limit=100)
         cache_service.set(cache_key, scoreboard, ttl=60)
         WebSocketService.emit_scoreboard_update(scoreboard)
         

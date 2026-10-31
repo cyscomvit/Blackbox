@@ -274,7 +274,7 @@
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-success update-unlock-btn" data-challenge-id="{{ challenge.id }}">
-                                                    <i class="bi bi-check"></i> Update
+                                                     Update
                                                 </button>
                                             </td>
                                         </tr>
@@ -310,7 +310,7 @@ document.getElementById('parent_challenge')?.addEventListener('change', async fu
     }
     
     try {
-        const response = await fetch(`/admin/branching/challenges/${challengeId}/flags`);
+        const response = await fetchWithCSRF(`/admin/branching/challenges/${challengeId}/flags`);
         const data = await response.json();
         
         flagSelect.innerHTML = '<option value="">Select a flag...</option>';
@@ -346,7 +346,7 @@ document.getElementById('quickBranchingForm')?.addEventListener('submit', async 
     }
     
     try {
-        const response = await fetch(`/admin/branching/flags/${flagId}/unlock`, {
+        const response = await fetchWithCSRF(`/admin/branching/flags/${flagId}/unlock`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -375,7 +375,7 @@ document.getElementById('quickBranchingForm')?.addEventListener('submit', async 
 // Load branching connections
 async function loadBranchingConnections() {
     try {
-        const response = await fetch('/admin/branching/connections');
+        const response = await fetchWithCSRF('/admin/branching/connections');
         const data = await response.json();
         
         const container = document.getElementById('branchingConnections');
@@ -417,7 +417,7 @@ async function removeBranching(flagId) {
     if (!confirm('Remove this branching connection?')) return;
     
     try {
-        const response = await fetch(`/admin/branching/flags/${flagId}/unlock`, {
+        const response = await fetchWithCSRF(`/admin/branching/flags/${flagId}/unlock`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -446,7 +446,7 @@ document.getElementById('addFlagForm').addEventListener('submit', async function
     const formData = new FormData(this);
     
     try {
-        const response = await fetch('/admin/branching/flags', {
+        const response = await fetchWithCSRF('/admin/branching/flags', {
             method: 'POST',
             body: formData
         });
@@ -477,7 +477,7 @@ document.getElementById('addPrerequisiteForm').addEventListener('submit', async 
     }
     
     try {
-        const response = await fetch('/admin/branching/prerequisites', {
+        const response = await fetchWithCSRF('/admin/branching/prerequisites', {
             method: 'POST',
             body: formData
         });
@@ -499,7 +499,7 @@ document.getElementById('addPrerequisiteForm').addEventListener('submit', async 
 // Load Flags
 async function loadFlags() {
     try {
-        const response = await fetch('/admin/branching/flags');
+        const response = await fetchWithCSRF('/admin/branching/flags');
         const data = await response.json();
         
         const flagsList = document.getElementById('flagsList');
@@ -543,7 +543,7 @@ async function loadFlags() {
 // Load Prerequisites
 async function loadPrerequisites() {
     try {
-        const response = await fetch('/admin/branching/prerequisites');
+        const response = await fetchWithCSRF('/admin/branching/prerequisites');
         const data = await response.json();
         
         const prerequisitesList = document.getElementById('prerequisitesList');
@@ -582,7 +582,7 @@ async function deleteFlag(flagId) {
     if (!confirm('Are you sure you want to delete this flag?')) return;
     
     try {
-        const response = await fetch(`/admin/branching/flags/${flagId}`, {
+        const response = await fetchWithCSRF(`/admin/branching/flags/${flagId}`, {
             method: 'DELETE'
         });
         
@@ -603,7 +603,7 @@ async function deletePrerequisite(prereqId) {
     if (!confirm('Are you sure you want to delete this prerequisite?')) return;
     
     try {
-        const response = await fetch(`/admin/branching/prerequisites/${prereqId}`, {
+        const response = await fetchWithCSRF(`/admin/branching/prerequisites/${prereqId}`, {
             method: 'DELETE'
         });
         
@@ -628,7 +628,7 @@ document.querySelectorAll('.update-unlock-btn').forEach(btn => {
         const isHidden = row.querySelector('.is-hidden-toggle').checked;
         
         try {
-            const response = await fetch(`/admin/branching/unlock-mode/${challengeId}`, {
+            const response = await fetchWithCSRF(`/admin/branching/unlock-mode/${challengeId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

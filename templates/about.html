@@ -1,125 +1,71 @@
 {% extends "base.html" %}
-
-{% block title %}About - {{ ctf_name }}{% endblock %}
-
+{% block title %}Rules & guide - {{ ctf_name }}{% endblock %}
 {% block content %}
-<div class="about-hero py-5 text-center text-white">
-    <div class="container">
-        <h1 class="display-4 fade-in">About {{ ctf_name }}</h1>
-        <p class="lead fade-in delay-1">A premier Capture The Flag competition platform.</p>
-    </div>
-</div>
-
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-10 mx-auto">
-            <div id="about-accordion">
-                <div class="accordion-item mb-3">
-                    <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                            <i class="bi bi-question-circle me-2 animated-icon"></i> How is this CTF different?
-                        </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#about-accordion">
-                        <div class="accordion-body">
-                            Welcome to the ultimate cybersecurity challenge. Test your skills, unlock unique challenges, and race to the top of the leaderboard. This platform features a wide variety of challenges across multiple categories. Some challenges may even feature dynamic environments or unique multi-flag mechanics to test your problem-solving skills. Choose your path wisely, as each decision shapes your journey.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item mb-3">
-                    <h2 class="accordion-header" id="headingTwo">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            <i class="bi bi-play-btn me-2 animated-icon"></i> How to Play
-                        </button>
-                    </h2>
-                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#about-accordion">
-                        <div class="accordion-body">
-                            <ol>
-                                <li><strong>Register:</strong> Create an account with your username, Full name, password and email. This is final and CANNOT BE CHANGED later</li>
-                                {% if act_system_enabled %}
-                                <li><strong>ACT system:</strong> Start out with ACT I and progress through the acts by solving challenges from different categories of challenges.</li>
-                                {% endif %}
-                                <li><strong>Solve:</strong> Download challenge files and solve locally and submit the flag. Or start challenge containers (on supported challenges) and find the unique flag for your Team</li>
-                                <li><strong>Score:</strong> Parabolic dynamic scoring mechanic may adjust values as solves increase. Your points reflect the current value of the challenges. You DO NOT keep the same amount of points you had while submitting the flag</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item mb-3">
-                    <h2 class="accordion-header" id="headingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            <i class="bi bi-graph-up me-2 animated-icon"></i> Scoring System
-                        </button>
-                    </h2>
-                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#about-accordion">
-                        <div class="accordion-body">
-                            <p>This CTF uses dynamic scoring. Challenge values decrease as more teams solve them. Your points reflect the current value of the challenges. You DO NOT keep the same amount of points you had while submitting the flag.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item mb-3">
-                    <h2 class="accordion-header" id="headingFour">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                            <i class="bi bi-shield-lock me-2 animated-icon"></i> Rules
-                        </button>
-                    </h2>
-                    <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#about-accordion">
-                        <div class="accordion-body">
-                            <ul>
-                                <li>Do not attack the CTF infrastructure. Any attempt will result in disqualification.</li>
-                                <li>Do not share flags or solutions with other teams. We take this seriously and violations will result in penalties/disqualification.</li>
-                                <li>Do not use automated tools to spam submissions. You will be rate limited</li>
-                                <li>Decisions made by the CTF organizers are final.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingFive">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                            <i class="bi bi-envelope-paper me-2 animated-icon"></i> Contact
-                        </button>
-                    </h2>
-                    <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#about-accordion">
-                        <div class="accordion-body">
-                            <p>For questions or issues, please contact the organizers.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<header class="guide-intro">
+    <p class="eyebrow">CYSCOM / Field guide</p>
+    <h1>Before your<br><span>first flag.</span></h1>
+    <p>How to compete, how scoring works, and the rules that keep the event fair.</p>
+</header>
+<div class="guide-layout">
+    <section class="guide-sections" aria-label="Playing guide">
+        <div class="accordion" id="about-accordion">
+            <section class="accordion-item" id="overview">
+                <h2 class="accordion-header" id="headingOne"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne"><span class="guide-number">01</span><span class="guide-topic">The challenge format<small>Briefs, files, and challenge targets</small></span></button></h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#about-accordion"><div class="accordion-body">
+                    <p>Each challenge gives you a problem to investigate. Your goal is to find a flag and submit it on the challenge page.</p>
+                    <p>Some challenges include downloadable files. Others provide a website, network service, or an isolated container. Read the challenge brief for connection details and any limits.</p>
+                    {% if act_system_enabled %}<p>Story progression is enabled for this event. Complete the required challenges to unlock the next act.</p>{% endif %}
+                    <a href="{{ url_for('challenges.list_challenges') }}" class="guide-inline-link">Explore the challenges <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div></div>
+            </section>
+            <section class="accordion-item" id="how-to-play">
+                <h2 class="accordion-header" id="headingTwo"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"><span class="guide-number">02</span><span class="guide-topic">How to play<small>From account access to a successful submission</small></span></button></h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#about-accordion"><div class="accordion-body">
+                    <ol class="guide-checklist">
+                        <li><strong>Set up your account.</strong><p>Register with your username, full name, and email, then sign in. Check your email if the event requires verification.</p></li>
+                        {% if teams_enabled %}<li><strong>Create or join a team.</strong><p>Use an invite code from your captain, or create your own team. Challenges marked as team-only require a team.</p></li>{% endif %}
+                        <li><strong>Read the brief.</strong><p>Choose a challenge, download its files or open its connection, and investigate locally.</p></li>
+                        <li><strong>Submit the flag.</strong><p>Paste the flag into the challenge submission form. The result confirms whether it was accepted and shows any points earned.</p></li>
+                    </ol>
+                    <a href="{{ url_for('about', _anchor='rules') }}" class="guide-inline-link">Read the event rules <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div></div>
+            </section>
+            <section class="accordion-item" id="scoring">
+                <h2 class="accordion-header" id="headingThree"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree"><span class="guide-number">03</span><span class="guide-topic">Scores & standings<small>Challenge values, hint costs, and rankings</small></span></button></h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#about-accordion"><div class="accordion-body">
+                    <p>Challenge values appear on each challenge. Static challenges keep their value. Dynamic challenges can decrease in value as more participants solve them.</p>
+                    <p>For dynamic challenges, your total reflects the current value of previous solves. Unlocking a paid hint deducts its displayed cost. Check the cost before confirming.</p>
+                    {% if current_user.is_authenticated and (scoreboard_visible or current_user.is_admin) %}<a href="{{ url_for('scoreboard.view_scoreboard') }}" class="guide-inline-link">Open the leaderboard <i class="bi bi-arrow-right" aria-hidden="true"></i></a>{% endif %}
+                </div></div>
+            </section>
+            <section class="accordion-item" id="rules">
+                <h2 class="accordion-header" id="headingFour"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour"><span class="guide-number">04</span><span class="guide-topic">Rules of engagement<small>Keep the competition fair for everyone</small></span></button></h2>
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#about-accordion"><div class="accordion-body">
+                    <ul class="guide-rules"><li><strong>Stay in scope.</strong> Attack only the targets explicitly provided by a challenge. Do not attack the event infrastructure.</li><li><strong>Keep flags within your team.</strong> Do not share flags or solutions with other participants or teams.</li><li><strong>Respect submission limits.</strong> Do not automate spam submissions. Challenge limits and rate limits apply.</li><li><strong>Follow organiser decisions.</strong> Rule violations can lead to penalties or disqualification. The organisers' decisions are final.</li></ul>
+                </div></div>
+            </section>
+            <section class="accordion-item" id="contact">
+                <h2 class="accordion-header" id="headingFive"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive"><span class="guide-number">05</span><span class="guide-topic">Need a hand?<small>Reporting a problem during the event</small></span></button></h2>
+                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#about-accordion"><div class="accordion-body"><p>Contact the organisers through the event's official communication channel. Include the challenge name, what happened, and the time of the issue so they can investigate.</p><p class="mb-0">Event announcements appear in the notification menu when you are signed in.</p></div></div>
+            </section>
         </div>
-    </div>
-    
+    </section>
+    <aside class="guide-reference">
+        <p class="eyebrow">At a glance</p><h2>Ready to connect?</h2><p>Start with the brief. Take notes. Check the response to each submission.</p>
+        <dl><div><dt>Challenge files</dt><dd>Download from the challenge page.</dd></div><div><dt>Containers</dt><dd>Start an instance where available.</dd></div><div><dt>Paid hints</dt><dd>The cost is shown before you unlock.</dd></div></dl>
+        <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-primary">{{ 'Open challenges' if current_user.is_authenticated else 'Sign in to compete' }} <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Back to home</a>
+    </aside>
 </div>
-
-<style>
-/* About page styling and small animations */
-.about-hero{
-    background: linear-gradient(135deg, rgba(13,110,253,0.95) 0%, rgba(10,58,202,0.95) 100%);
-}
-.about-hero .display-4{font-weight:700}
-.fade-in{opacity:0;animation:fadeInUp .7s ease forwards}
-.delay-1{animation-delay:.18s}
-@keyframes fadeInUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
-.animated-icon{transition:transform .25s ease,color .25s ease}
-.accordion-button:not(.collapsed) .animated-icon{transform:rotate(10deg);color:#0d6efd}
-.accordion-button{font-weight:600}
-.accordion-body{font-size:0.95rem}
-@media (max-width:768px){.about-hero .display-4{font-size:1.75rem}}
-</style>
-
+{% endblock %}
+{% block extra_js %}
 <script>
-// small flourish: open the first accordion panel on load
-document.addEventListener('DOMContentLoaded', function(){
-    var firstCollapse = document.getElementById('collapseOne');
-    if(firstCollapse){
-        var bsCollapse = new bootstrap.Collapse(firstCollapse, {toggle: false});
-        bsCollapse.show();
-    }
-});
+function openGuideAnchor() {
+    const section = document.getElementById(window.location.hash.slice(1));
+    const panel = section && section.querySelector('.accordion-collapse');
+    if (panel && window.bootstrap) bootstrap.Collapse.getOrCreateInstance(panel, { toggle: false }).show();
+}
+document.addEventListener('DOMContentLoaded', openGuideAnchor);
+window.addEventListener('hashchange', openGuideAnchor);
 </script>
 {% endblock %}

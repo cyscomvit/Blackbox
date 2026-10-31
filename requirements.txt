@@ -1,3 +1,4 @@
+# Runtime dependencies. Theme and photo assets are served locally; no extra UI package is required.
 Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
 Flask-Login==0.6.2
@@ -21,7 +22,7 @@ WTForms==3.0.1
 email-validator==2.0.0
 python-dotenv==1.0.0
 python-dateutil==2.8.2
-gunicorn==21.2.0
+gunicorn==21.2.0; platform_system != "Windows"
 pytz==2024.1
 APScheduler==3.10.4
 docker==7.1.0

@@ -67,7 +67,7 @@
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <button class="btn btn-sm btn-link p-0 ms-1" 
-                                            onclick="showScoreModal({{ user.id }}, '{{ user.username }}', {{ user.get_score() }}, 'user')"
+                                            onclick='showScoreModal({{ user.id }}, {{ user.username|tojson }}, {{ user.get_score() }}, "user")'
                                             title="Quick Edit Score">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
@@ -96,7 +96,7 @@
                                                 onclick="toggleActive({{ user.id }})" 
                                                 title="Toggle Active"
                                                 {% if user.id == current_user.id %}disabled{% endif %}>
-                                            <i class="bi bi-person-check"></i>
+                                            
                                         </button>
                                     </div>
                                 </td>
@@ -166,7 +166,7 @@
                                    placeholder="e.g., Bonus for participation, Penalty for rule violation">
                         </div>
                         <button class="btn btn-primary w-100" onclick="adjustPoints()">
-                            <i class="bi bi-check-circle"></i> Apply Point Adjustment
+                             Apply Point Adjustment
                         </button>
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                 <!-- Solve History -->
                 <div class="card">
                     <div class="card-header">
-                        <i class="bi bi-list-check"></i> Recent Solves & Adjustments
+                         Recent Solves & Adjustments
                     </div>
                     <div class="card-body" id="solve-history">
                         <div class="text-center text-muted">
@@ -225,7 +225,7 @@ function loadSolveHistory(id, type) {
         ? `/admin/users/${id}/solves`
         : `/admin/teams/${id}/solves`;
     
-    fetch(endpoint)
+    fetchWithCSRF(endpoint)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -315,7 +315,7 @@ function adjustPoints() {
         ? `/admin/users/${currentTargetId}/adjust-points`
         : `/admin/teams/${currentTargetId}/adjust-points`;
     
-    fetch(endpoint, {
+    fetchWithCSRF(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -349,7 +349,7 @@ function adjustPoints() {
 }
 
 function toggleAdmin(userId) {
-    fetch(`/admin/users/${userId}/toggle-admin`, {
+    fetchWithCSRF(`/admin/users/${userId}/toggle-admin`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -373,7 +373,7 @@ function toggleAdmin(userId) {
 }
 
 function toggleActive(userId) {
-    fetch(`/admin/users/${userId}/toggle-active`, {
+    fetchWithCSRF(`/admin/users/${userId}/toggle-active`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

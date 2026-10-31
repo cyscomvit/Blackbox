@@ -5,23 +5,23 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
-        <div class="card shadow">
+        <div class="card auth-card">
             <div class="card-body p-5">
                 <h2 class="text-center mb-4">
-                    <i class="bi bi-box-arrow-in-right"></i> Login
+                    Login
                 </h2>
                 
-                <form method="POST" action="{{ url_for('auth.login') }}">
+                <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" 
-                               required autofocus>
+                               required autofocus autocomplete="username">
                     </div>
                     
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" name="password" 
-                               required>
+                               required autocomplete="current-password">
                     </div>
                     
                     <div class="mb-3 form-check">
@@ -33,21 +33,21 @@
                     
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-box-arrow-in-right"></i> Login
+                            Login
                         </button>
                     </div>
                 </form>
                 
-                {% if registration_enabled %}
                 <div class="text-center mt-4">
+                    {% if registration_enabled %}
                     <p class="mb-2">Don't have an account? 
                         <a href="{{ url_for('auth.register') }}">Register here</a>
                     </p>
+                    {% endif %}
                     <p class="mb-0">
                         <a href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a>
                     </p>
                 </div>
-                {% endif %}
                 
                 {% if unverified_email %}
                 <div class="mt-4 p-3 border rounded text-center" style="background-color: var(--bs-tertiary-bg, rgba(128,128,128,0.1));">

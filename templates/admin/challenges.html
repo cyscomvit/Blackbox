@@ -52,9 +52,7 @@
                             <tr id="challenge-{{ challenge.id }}">
                                 <td>
                                     <strong>{{ challenge.name }}</strong>
-                                    {% if challenge.is_dynamic %}
-                                    <span class="badge bg-info text-white ms-1">Dynamic</span>
-                                    {% endif %}
+                                    {% include 'components/challenge_type.html' %}
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark">{{ challenge.act }}</span>
@@ -75,11 +73,11 @@
                                     <div class="status-badges">
                                         {% if not challenge.is_enabled %}
                                         <span class="badge bg-danger" id="enabled-badge-{{ challenge.id }}">
-                                            <i class="bi bi-x-circle"></i> Disabled
+                                            Disabled
                                         </span>
                                         {% else %}
                                         <span class="badge bg-success" id="enabled-badge-{{ challenge.id }}">
-                                            <i class="bi bi-check-circle"></i> Enabled
+                                            Enabled
                                         </span>
                                         {% endif %}
                                         
@@ -129,7 +127,7 @@
 
 <script>
 function toggleEnabled(id, currentlyEnabled) {
-    fetch(`/admin/challenges/${id}/toggle-enabled`, {
+    fetchWithCSRF(`/admin/challenges/${id}/toggle-enabled`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -144,10 +142,10 @@ function toggleEnabled(id, currentlyEnabled) {
             const badge = document.getElementById(`enabled-badge-${id}`);
             if (newState) {
                 badge.className = 'badge bg-success';
-                badge.innerHTML = '<i class="bi bi-check-circle"></i> Enabled';
+                badge.innerHTML = 'Enabled';
             } else {
                 badge.className = 'badge bg-danger';
-                badge.innerHTML = '<i class="bi bi-x-circle"></i> Disabled';
+                badge.innerHTML = 'Disabled';
             }
             
             // Update button
@@ -179,7 +177,7 @@ function deleteChallenge(id, name) {
         return;
     }
     
-    fetch(`/admin/challenges/${id}/delete`, {
+    fetchWithCSRF(`/admin/challenges/${id}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

@@ -1,5 +1,21 @@
 # BlackBox CTF Platform
 
+## Test the updated UI locally
+
+The files in this checkout include five colour themes (Default, Graphite, Forest, Copper and Paper), managed in the existing admin background-theme settings, and a translucent CYSCOM leaderboard for signed-in participants. Admins retain the existing scoreboard visibility switch. Source repository: [guhan (DaBot) / pcguhan](https://github.com/pcguhan/Blackbox).
+
+A disposable preview runs without MySQL, Redis or Docker:
+
+```powershell
+# A local virtual environment has already been prepared for this checkout.
+.\.venv\Scripts\python.exe scripts\preview_ui.py
+```
+
+Open **http://127.0.0.1:5050**. Sign in as `preview-admin` or `preview-player` with password `PreviewOnly123!`. Sample data resets when the preview restarts. It does not use your configured production database.
+
+For a fresh environment, create `.venv` and install `requirements-dev.txt`. Run `python -m unittest tests.test_ui -v` for the integration checks. [UI verification notes](docs/ui-requirements.md) describe the test commands. Runtime Python dependencies are in `requirements.txt`; `requirements-win.txt` includes that same manifest, and optional test tools are in `requirements-dev.txt`. Email, Docker provisioning and production backups require the corresponding configured services.
+
+
 <div align="center">
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue.svg)
@@ -225,7 +241,7 @@ A modern, feature-rich Capture The Flag (CTF) platform built with Flask, designe
 
 ```bash
 # Clone the repository
-git clone https://github.com/Unknnownnn/Blackbox.git
+git clone https://github.com/pcguhan/Blackbox.git
 cd Blackbox
 chmod +x docker-entrypoint.sh enable_docker.sh
 
@@ -286,7 +302,7 @@ To deploy:
 
 ```bash
 # Clone repository
-git clone https://github.com/Unknnownnn/Blackbox.git
+git clone https://github.com/pcguhan/Blackbox.git
 cd Blackbox
 
 # Create virtual environment

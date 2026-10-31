@@ -47,7 +47,7 @@ def login():
             log_audit_event(user_id=user.id, team_id=user.team_id, action='LOGIN_SUCCESS')
             
             next_page = request.args.get('next')
-            if next_page:
+            if next_page and next_page.startswith('/') and not next_page.startswith('//') and '\\' not in next_page:
                 return redirect(next_page)
             
             # Redirect based on admin status

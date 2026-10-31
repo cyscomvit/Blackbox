@@ -61,7 +61,7 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 300
     
     # Application
-    CTF_NAME = os.getenv('CTF_NAME', 'BlackBox CTF')
+    CTF_NAME = os.getenv('CTF_NAME', 'CYSCOM')
     CTF_DESCRIPTION = os.getenv('CTF_DESCRIPTION', 'Capture The Flag Competition')
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@blackbox.ctf')
     REGISTRATION_ENABLED = os.getenv('REGISTRATION_ENABLED', 'true').lower() == 'true'
@@ -80,6 +80,7 @@ class Config:
     
     # File Upload
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'))
+    LOGO_UPLOAD_FOLDER = os.getenv('LOGO_UPLOAD_FOLDER', os.path.join(UPLOAD_FOLDER, 'logos'))
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_UPLOAD_SIZE', 50 * 1024 * 1024))  # 50MB default
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 
                          'tar', 'gz', 'bz2', '7z', 'rar', 'exe', 'bin', 
@@ -122,6 +123,8 @@ class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+    CACHE_TYPE = 'SimpleCache'
 
 # Configuration dictionary
 config = {

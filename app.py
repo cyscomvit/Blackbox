@@ -64,7 +64,7 @@ def create_app(config_name=None):
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
-    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message = None
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -118,7 +118,12 @@ def create_app(config_name=None):
     def index():
         """Homepage"""
         return render_template('index.html')
-    
+
+    @app.route('/api/event-status')
+    def event_status():
+        from models.settings import Settings
+        return app.json.response(started=Settings.is_ctf_started())
+
     @app.route('/about')
     def about():
         """About page"""
@@ -129,7 +134,7 @@ def create_app(config_name=None):
     @app.route('/uploads/<path:filename>')
     def serve_logo(filename):
         """Serve uploaded logo files from /var/uploads/logos"""
-        logos_folder = '/var/uploads/logos'
+        logos_folder = app.config['LOGO_UPLOAD_FOLDER']
         try:
             return send_from_directory(logos_folder, filename)
         except FileNotFoundError:
@@ -232,7 +237,7 @@ def create_app(config_name=None):
         from models.settings import Settings
         
         # Load from database settings (with fallback to config)
-        ctf_name = Settings.get('ctf_name', app.config.get('CTF_NAME', 'BlackBox CTF'))
+        ctf_name = Settings.get('ctf_name', app.config.get('CTF_NAME', 'CYSCOM'))
         ctf_description = Settings.get('ctf_description', app.config.get('CTF_DESCRIPTION', ''))
         allow_registration = Settings.get('allow_registration', True)
         ctf_logo = Settings.get('ctf_logo', '')
@@ -246,6 +251,7 @@ def create_app(config_name=None):
             'ctf_logo': ctf_logo,
             'teams_enabled': teams_enabled,
             'scoreboard_visible': scoreboard_visible,
+            'competition_state': Settings.get_ctf_status(),
             'settings': Settings
         }
     
@@ -289,38 +295,39 @@ def main():
 
 app = create_app()
 
-# Initialize backup scheduler for production (gunicorn)
-with app.app_context():
-    try:
-        from services.backup_scheduler import init_backup_scheduler
-        scheduler = init_backup_scheduler(app)
-        scheduler.reschedule()
-    except Exception as e:
-        app.logger.warning(f"Could not initialize backup scheduler during app creation: {e}")
+if not app.testing:
+    # Initialize backup scheduler for production (gunicorn)
+    with app.app_context():
+        try:
+            from services.backup_scheduler import init_backup_scheduler
+            scheduler = init_backup_scheduler(app)
+            scheduler.reschedule()
+        except Exception as e:
+            app.logger.warning(f"Could not initialize backup scheduler during app creation: {e}")
 
-    # Ensure DB schema has required docker-related columns and defaults
-    try:
-        from scripts.db_schema import ensure_docker_schema
-        ensure_docker_schema()
-        app.logger.info("Ensured docker DB schema and defaults")
-    except Exception as e:
-        app.logger.warning(f"Could not ensure docker DB schema on startup: {e}")
+        # Ensure DB schema has required docker-related columns and defaults
+        try:
+            from scripts.db_schema import ensure_docker_schema
+            ensure_docker_schema()
+            app.logger.info("Ensured docker DB schema and defaults")
+        except Exception as e:
+            app.logger.warning(f"Could not ensure docker DB schema on startup: {e}")
 
-# Initialize container reconciliation background task
-try:
-    import threading
-    from services.container_reconciliation import run_reconciliation_loop
-    
-    reconciliation_thread = threading.Thread(
-        target=run_reconciliation_loop,
-        args=(app, 60),  # Check every 60 seconds
-        daemon=True,
-        name="ContainerReconciliation"
-    )
-    reconciliation_thread.start()
-    app.logger.info("Container reconciliation background task started")
-except Exception as e:
-    app.logger.warning(f"Could not start container reconciliation task: {e}")
+    # Initialize container reconciliation background task
+    try:
+        import threading
+        from services.container_reconciliation import run_reconciliation_loop
+
+        reconciliation_thread = threading.Thread(
+            target=run_reconciliation_loop,
+            args=(app, 60),  # Check every 60 seconds
+            daemon=True,
+            name="ContainerReconciliation"
+        )
+        reconciliation_thread.start()
+        app.logger.info("Container reconciliation background task started")
+    except Exception as e:
+        app.logger.warning(f"Could not start container reconciliation task: {e}")
 
 
 if __name__ == '__main__':

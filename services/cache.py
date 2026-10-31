@@ -44,8 +44,10 @@ class CacheService:
     
     def invalidate_scoreboard(self):
         """Clear scoreboard cache"""
+        self.redis_client.delete('scoreboard_full_team', 'scoreboard_full_individual')
         self.redis_client.delete('scoreboard:team')
         self.redis_client.delete('scoreboard:individual')
+        self.redis_client.delete('scoreboard_team', 'scoreboard_individual')
     
     # Challenge caching
     def get_challenge(self, challenge_id):

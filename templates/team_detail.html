@@ -219,7 +219,7 @@ function copyInviteCode() {
     
     const btn = event.target.closest('button');
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+    btn.innerHTML = ' Copied!';
     btn.classList.remove('btn-outline-secondary');
     btn.classList.add('btn-success');
     
@@ -235,7 +235,7 @@ function leaveTeam() {
         return;
     }
     
-    fetch('{{ url_for("teams.leave_team", team_id=team.id) }}', {
+    fetchWithCSRF('{{ url_for("teams.leave_team", team_id=team.id) }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -260,7 +260,7 @@ function kickMember(userId, username) {
         return;
     }
     
-    fetch(`{{ url_for("teams.kick_member", team_id=team.id, user_id=0) }}`.replace('/0', `/${userId}`), {
+    fetchWithCSRF(`{{ url_for("teams.kick_member", team_id=team.id, user_id=0) }}`.replace('/0', `/${userId}`), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

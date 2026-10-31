@@ -1,105 +1,46 @@
 {% extends "base.html" %}
-
 {% block title %}Profile - {{ ctf_name }}{% endblock %}
-
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    <i class="bi bi-person-circle" style="font-size: 5rem; color: #6c757d;"></i>
-                </div>
-                <h4>{{ user.username }}</h4>
-                {% if user.full_name %}
-                <p class="text-muted">{{ user.full_name }}</p>
-                {% endif %}
-                <p class="text-muted">
-                    <i class="bi bi-envelope"></i> {{ user.email }}
-                </p>
-                {% if user.is_admin %}
-                <span class="badge bg-danger">Admin</span>
-                {% endif %}
-                <hr>
-                <p class="small text-muted mb-0">
-                    Joined {{ user.created_at|format_datetime('%B %d, %Y') if user.created_at else 'Unknown' }}
-                </p>
+<header class="profile-heading">
+    <div><p class="eyebrow">Your account</p><h1>Profile</h1><p class="text-muted mb-0">Account details and your challenge history.</p></div>
+    <a class="btn btn-outline-primary" href="{{ url_for('challenges.list_challenges') }}">Open challenges</a>
+</header>
+<div class="profile-layout">
+    <aside class="profile-account" aria-label="Account details">
+        <div class="profile-identity"><div><h2>{{ user.username }}</h2><span class="text-muted">{{ 'Administrator' if user.is_admin else 'Participant' }}</span></div></div>
+        <dl class="profile-details">
+            {% if user.full_name %}<div><dt>Full name</dt><dd>{{ user.full_name }}</dd></div>{% endif %}
+            <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+            <div><dt>Joined</dt><dd>{{ user.created_at|format_datetime('%d %b %Y') if user.created_at else 'Unknown' }}</dd></div>
+            <div><dt>Team membership</dt><dd>{{ 'Team member' if user.team_id else 'No team joined' }}</dd></div>
+        </dl>
+        {% if user.team_id %}<a class="btn btn-outline-primary" href="{{ url_for('teams.view_team', team_id=user.team_id) }}">View my team</a>{% endif %}
+    </aside>
+    <section class="profile-progress" aria-label="Challenge progress">
+        <dl class="profile-metrics">
+            <div><dt>{{ 'Team points' if user.team_id else 'Total points' }}</dt><dd>{{ progress.total_score }}</dd><small>Current score, including adjustments and hint costs</small></div>
+            <div><dt>Your challenges solved</dt><dd>{{ progress.solves|length }}</dd><small>Challenges you have personally completed</small></div>
+        </dl>
+        <section class="profile-history" aria-labelledby="history-title">
+            <div class="profile-history-heading"><h2 id="history-title">Solved challenges</h2><span class="text-muted">{{ progress.solves|length }} completed</span></div>
+            {% if progress.solves %}
+            <div class="table-responsive">
+                <table class="table mb-0 profile-table">
+                    <caption class="visually-hidden">Your solved challenges and points awarded at submission time</caption>
+                    <thead><tr><th scope="col">Challenge</th><th scope="col">Type</th><th scope="col" class="text-end">Points awarded</th><th scope="col">Solved</th></tr></thead>
+                    <tbody>{% for solve in progress.solves|sort(attribute='solved_at', reverse=true) %}
+                        <tr><td><a href="{{ url_for('challenges.view_challenge', challenge_id=solve.challenge_id) }}">{{ solve.challenge_name }}</a><small class="profile-category">{{ solve.category }}</small></td>
+                        <td>{% with challenge=solve %}{% include 'components/challenge_type.html' %}{% endwith %}</td>
+                        <td class="text-end profile-points">{{ solve.points_earned }}</td>
+                        <td><time datetime="{{ solve.solved_at }}Z">{{ solve.solved_at[:10] }}</time></td></tr>
+                    {% endfor %}</tbody>
+                </table>
             </div>
-        </div>
-        
-        {% if user.team_id %}
-        <div class="card mt-3">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-people-fill"></i> Team
-                </h5>
-                <a href="{{ url_for('teams.view_team', team_id=user.team_id) }}" 
-                   class="btn btn-outline-primary btn-sm">
-                    View My Team
-                </a>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <div class="col-md-8">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Statistics</h5>
-                <div class="row text-center">
-                    <div class="col-4">
-                        <h2 class="text-primary">{{ progress.total_score }}</h2>
-                        <p class="text-muted">Total Points</p>
-                    </div>
-                    <div class="col-4">
-                        <h2 class="text-success">{{ progress.challenges_solved }}</h2>
-                        <p class="text-muted">Challenges Solved</p>
-                    </div>
-                    <div class="col-4">
-                        <h2 class="text-info">
-                            {% if user.team_id %}
-                            <i class="bi bi-check-circle-fill"></i>
-                            {% else %}
-                            <i class="bi bi-x-circle-fill"></i>
-                            {% endif %}
-                        </h2>
-                        <p class="text-muted">In Team</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Solved Challenges</h5>
-                {% if progress.solves %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Challenge</th>
-                                <th>Category</th>
-                                <th>Points</th>
-                                <th>Solved At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for solve in progress.solves %}
-                            <tr>
-                                <td>{{ solve.challenge_name }}</td>
-                                <td><span class="badge bg-primary">{{ solve.category }}</span></td>
-                                <td>{{ solve.points_earned }}</td>
-                                <td>{{ solve.solved_at[:10] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-muted">No challenges solved yet. <a href="{{ url_for('challenges.list_challenges') }}">Start solving!</a></p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+            <p class="profile-history-note">Points awarded show the value at submission time. Challenges with variable scoring can change your current total.</p>
+            {% else %}
+            <div class="profile-empty"><h3>Your first solve starts here.</h3><p class="text-muted">Choose a challenge, read the brief, and submit a flag. Your completed challenges will appear here.</p><a class="btn btn-outline-primary" href="{{ url_for('challenges.list_challenges') }}">Browse challenges</a></div>
+            {% endif %}
+        </section>
+    </section>
 </div>
 {% endblock %}

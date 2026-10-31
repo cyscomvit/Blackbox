@@ -53,7 +53,7 @@
                                 <td>
                                     <span class="badge bg-primary">{{ team.get_score() }}</span>
                                     <button class="btn btn-sm btn-link p-0 ms-1" 
-                                            onclick="showScoreModal({{ team.id }}, '{{ team.name }}', {{ team.get_score() }}, 'team')">
+                                            onclick='showScoreModal({{ team.id }}, {{ team.name|tojson }}, {{ team.get_score() }}, "team")'>
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                 </td>
@@ -65,7 +65,7 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <button type="button" class="btn btn-outline-danger" 
-                                                onclick="deleteTeam({{ team.id }}, '{{ team.name }}')" 
+                                                onclick='deleteTeam({{ team.id }}, {{ team.name|tojson }})'
                                                 title="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -137,7 +137,7 @@
                                    placeholder="e.g., Bonus for participation, Penalty for rule violation">
                         </div>
                         <button class="btn btn-primary w-100" onclick="adjustPoints()">
-                            <i class="bi bi-check-circle"></i> Apply Point Adjustment
+                             Apply Point Adjustment
                         </button>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                 <!-- Solve History -->
                 <div class="card">
                     <div class="card-header">
-                        <i class="bi bi-list-check"></i> Recent Solves & Adjustments
+                         Recent Solves & Adjustments
                     </div>
                     <div class="card-body" id="solve-history">
                         <div class="text-center text-muted">
@@ -196,7 +196,7 @@ function loadSolveHistory(id, type) {
         ? `/admin/users/${id}/solves`
         : `/admin/teams/${id}/solves`;
     
-    fetch(endpoint)
+    fetchWithCSRF(endpoint)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -286,7 +286,7 @@ function adjustPoints() {
         ? `/admin/users/${currentTargetId}/adjust-points`
         : `/admin/teams/${currentTargetId}/adjust-points`;
     
-    fetch(endpoint, {
+    fetchWithCSRF(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -324,7 +324,7 @@ function deleteTeam(teamId, teamName) {
         return;
     }
     
-    fetch(`/admin/teams/${teamId}/delete`, {
+    fetchWithCSRF(`/admin/teams/${teamId}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

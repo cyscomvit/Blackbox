@@ -330,7 +330,7 @@
                             <i class="bi bi-x-circle"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-primary btn-lg px-5">
-                            <i class="bi bi-check-circle"></i> Create Challenge
+                             Create Challenge
                         </button>
                     </div>
                 </form>
@@ -354,11 +354,11 @@
 }
 
 .card {
-    transition: box-shadow 0.2s ease-in-out;
+
 }
 
 .card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
 }
 
 .border-primary {
@@ -549,7 +549,7 @@ function toggleDockerSettings() {
 function loadDockerImages() {
     const select = document.getElementById('docker_image');
     
-    fetch('/admin/docker/images')
+    fetchWithCSRF('/admin/docker/images')
         .then(response => response.json())
         .then(data => {
             select.innerHTML = '';

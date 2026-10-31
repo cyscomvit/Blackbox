@@ -11,17 +11,24 @@ class WebSocketService:
     @staticmethod
     def init_app(app):
         """Initialize SocketIO with Flask app"""
-        socketio.init_app(app,cors_allowed_origins="*", async_mode='gevent', logger=True, engineio_logger=True)
+        socketio.init_app(app, cors_allowed_origins="*", async_mode='gevent',
+                         logger=app.debug, engineio_logger=app.debug)
     
     @staticmethod
     def emit_scoreboard_update(scoreboard_data):
         """Emit scoreboard update to all connected clients"""
-        socketio.emit('scoreboard_update', scoreboard_data, namespace='/live')
+        from models.settings import Settings
+        from services.standings import frozen_snapshot
+        public = not frozen_snapshot() and Settings.is_ctf_started() and Settings.get('scoreboard_visible', default=True, type='bool')
+        socketio.emit('scoreboard_update', scoreboard_data, namespace='/live', to='scoreboard_authenticated' if public else 'scoreboard_admin')
     
     @staticmethod
     def emit_new_solve(solve_data):
         """Emit new solve notification"""
-        socketio.emit('new_solve', solve_data, namespace='/live')
+        from models.settings import Settings
+        from services.standings import frozen_snapshot
+        visible = not frozen_snapshot() and Settings.is_ctf_started() and Settings.get('scoreboard_visible', default=True, type='bool')
+        socketio.emit('new_solve', solve_data, namespace='/live', to='scoreboard_authenticated' if visible else 'scoreboard_admin')
     
     @staticmethod
     def emit_challenge_update(challenge_data):
@@ -43,6 +50,10 @@ class WebSocketService:
 @socketio.on('connect', namespace='/live')
 def handle_connect():
     """Handle client connection"""
+    if current_user.is_authenticated:
+        join_room('scoreboard_authenticated')
+        if current_user.is_admin:
+            join_room('scoreboard_admin')
     print(f'Client connected: {request.sid}')
     emit('connected', {'data': 'Connected to live updates'})
 
@@ -56,6 +67,8 @@ def handle_disconnect():
 @socketio.on('join_scoreboard', namespace='/live')
 def handle_join_scoreboard():
     """Client joins scoreboard room for live updates"""
+    if not current_user.is_authenticated:
+        return
     join_room('scoreboard')
     emit('status', {'msg': 'Joined scoreboard room'})
 
@@ -74,18 +87,14 @@ def handle_request_scoreboard():
     from services.cache import cache_service
     from models.settings import Settings
     
-    # Check if teams are enabled
-    teams_enabled = Settings.get('teams_enabled', default=True, type='bool')
-    
-    # Try cache first
-    cache_key = 'scoreboard_team' if teams_enabled else 'scoreboard_individual'
-    scoreboard = cache_service.get(cache_key)
-    
-    if not scoreboard:
-        # Generate fresh scoreboard
-        scoreboard = ScoringService.get_scoreboard(team_based=teams_enabled, limit=100)
-        cache_service.set(cache_key, scoreboard, ttl=60)
-    
+    is_admin = current_user.is_authenticated and current_user.is_admin
+    if not current_user.is_authenticated or (not is_admin and (not Settings.is_ctf_started() or not Settings.get('scoreboard_visible', default=True, type='bool'))):
+        emit('scoreboard_update', [])
+        return
+
+    from services.standings import standings_for
+    scoreboard = standings_for(current_user)[:100]
+
     emit('scoreboard_update', scoreboard)
 
 
